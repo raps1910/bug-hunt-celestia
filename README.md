@@ -1,373 +1,73 @@
-# bug-hunt-celestia
+# Celestia Node
 
-1
+[![Go Reference](https://pkg.go.dev/badge/github.com/celestiaorg/celestia-node.svg)](https://pkg.go.dev/github.com/celestiaorg/celestia-node)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/celestiaorg/celestia-node)](https://github.com/celestiaorg/celestia-node/releases/latest)
+[![test](https://github.com/celestiaorg/celestia-node/actions/workflows/test.yml/badge.svg)](https://github.com/celestiaorg/celestia-node/actions/workflows/test.yml)
+[![lint](https://github.com/celestiaorg/celestia-node/actions/workflows/lint.yml/badge.svg)](https://github.com/celestiaorg/celestia-node/actions/workflows/lint.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/celestiaorg/celestia-node)](https://goreportcard.com/report/github.com/celestiaorg/celestia-node)
+[![codecov](https://codecov.io/gh/celestiaorg/celestia-node/branch/main/graph/badge.svg?token=CWGA4RLDS9)](https://codecov.io/gh/celestiaorg/celestia-node)
 
-Skip to content
-Pull requests
-Issues
-Marketplace
-Explore
-@Kuzmin55
-celestiaorg /
-celestia-node
-Public
+Golang implementation of Celestia's data availability node types (`light` | `full` | `bridge`).
 
-Code
-Issues 130
-Pull requests 11
-Actions
-Projects 1
-Wiki
-Security
+The celestia-node types described above comprise the celestia data availability (DA) network.
 
-    Insights
+The DA network wraps the celestia-core consensus network by listening for blocks from the consensus network and making them digestible for data availability sampling (DAS).
 
-(cmd | node/rpc): Make RPC port configurable and ensure port 0 used f…
+Continue reading [here](https://blog.celestia.org/celestia-mvp-release-data-availability-sampling-light-clients) if you want to learn more about DAS and how it enables secure and scalable access to Celestia chain data.
 
-…or swamp (#617)
+## Minimum requirements
 
-    main (#617) 
+| Requirement | Notes          |
+|-------------|----------------|
+| Go version  | 1.17 or higher |
 
-@renaynay
-renaynay committed 24 days ago
-1 parent 8dc6e20 commit f6b97b9c13ba5d4f20ba3fbb4721909b3fc49d7c
-Showing
-with 117 additions and 20 deletions.
-7
-cmd/celestia/bridge.go
-@@ -27,13 +27,15 @@ func init() {
-			cmdnode.CoreFlags(),
-			cmdnode.TrustedHashFlags(),
-			cmdnode.MiscFlags(),
-			cmdnode.RPCFlags(),
-		),
-		cmdnode.Start(
-			cmdnode.NodeFlags(node.Bridge),
-			cmdnode.P2PFlags(),
-			cmdnode.CoreFlags(),
-			cmdnode.TrustedHashFlags(),
-			cmdnode.MiscFlags(),
-			cmdnode.RPCFlags(),
-		),
-		bridgeKeyCmd,
-	)
-@@ -76,6 +78,11 @@ var bridgeCmd = &cobra.Command{
-			return err
-		}
+## System Requirements 
 
-		err = cmdnode.ParseRPCFlags(cmd, env)
-		if err != nil {
-			return err
-		}
+See the official docs page for system requirements per node type: 
+* [Bridge](https://docs.celestia.org/nodes/bridge-validator-node#hardware-requirements)
+* [Light](https://docs.celestia.org/nodes/light-node#hardware-requirements)
+* *Full coming soon*
 
-		return nil
-	},
-}
-7
-cmd/celestia/full.go
-@@ -29,6 +29,7 @@ func init() {
-			// NOTE: for now, state-related queries can only be accessed
-			// over an RPC connection with a celestia-core node.
-			cmdnode.CoreFlags(),
-			cmdnode.RPCFlags(),
-		),
-		cmdnode.Start(
-			cmdnode.NodeFlags(node.Full),
-@@ -38,6 +39,7 @@ func init() {
-			// NOTE: for now, state-related queries can only be accessed
-			// over an RPC connection with a celestia-core node.
-			cmdnode.CoreFlags(),
-			cmdnode.RPCFlags(),
-		),
-		fullKeyCmd,
-	)
-@@ -80,6 +82,11 @@ var fullCmd = &cobra.Command{
-			return err
-		}
+## Installation
 
-		err = cmdnode.ParseRPCFlags(cmd, env)
-		if err != nil {
-			return err
-		}
+```sh
+git clone https://github.com/celestiaorg/celestia-node.git 
+cd celestia-node
+make install
+```
 
-		return nil
-	},
-}
-7
-cmd/celestia/light.go
-@@ -29,6 +29,7 @@ func init() {
-			// NOTE: for now, state-related queries can only be accessed
-			// over an RPC connection with a celestia-core node.
-			cmdnode.CoreFlags(),
-			cmdnode.RPCFlags(),
-		),
-		cmdnode.Start(
-			cmdnode.NodeFlags(node.Light),
-@@ -38,6 +39,7 @@ func init() {
-			// NOTE: for now, state-related queries can only be accessed
-			// over an RPC connection with a celestia-core node.
-			cmdnode.CoreFlags(),
-			cmdnode.RPCFlags(),
-		),
-		lightKeyCmd,
-	)
-@@ -79,6 +81,11 @@ var lightCmd = &cobra.Command{
-			return err
-		}
+For more information on setting up a node and the hardware requirements needed, go visit our docs at <https://docs.celestia.org>.
 
-		err = cmdnode.ParseRPCFlags(cmd, env)
-		if err != nil {
-			return err
-		}
+## API docs
 
-		return nil
-	},
-}
-44
-cmd/flags_rpc.go
-@@ -0,0 +1,44 @@
-package cmd
+Celestia-node public API is documented [here](https://docs.celestia.org/developers/node-api/).
 
-import (
-	"github.com/spf13/cobra"
-	flag "github.com/spf13/pflag"
+## Node types
 
-	"github.com/celestiaorg/celestia-node/node"
-)
+- **Bridge** nodes - relay blocks from the celestia consensus network to the celestia data availability (DA) network
+- **Full** nodes - fully reconstruct and store blocks by sampling the DA network for shares
+- **Light** nodes - verify the availability of block data by sampling the DA network for shares
 
-var (
-	addrFlag = "rpc.addr"
-	portFlag = "rpc.port"
-)
+More information can be found [here](https://github.com/celestiaorg/celestia-node/blob/main/docs/adr/adr-003-march2022-testnet.md#legend).
 
-// RPCFlags gives a set of hardcoded node/rpc package flags.
-func RPCFlags() *flag.FlagSet {
-	flags := &flag.FlagSet{}
+## Run a node
 
-	flags.String(
-		addrFlag,
-		"",
-		"Set a custom RPC listen address (default: localhost)",
-	)
-	flags.String(
-		portFlag,
-		"",
-		"Set a custom RPC port (default: 26658)",
-	)
+`<node_type>` can be `bridge`, `full` or `light`.
 
-	return flags
-}
+```sh
+celestia <node_type> init 
+```
 
-// ParseRPCFlags parses RPC flags from the given cmd and applies values to Env.
-func ParseRPCFlags(cmd *cobra.Command, env *Env) error {
-	addr := cmd.Flag(addrFlag).Value.String()
-	if addr != "" {
-		env.AddOptions(node.WithRPCAddress(addr))
-	}
-	port := cmd.Flag(portFlag).Value.String()
-	if port != "" {
-		env.AddOptions(node.WithRPCPort(port))
-	}
-	return nil
-}
-16
-node/components.go
-@@ -10,9 +10,7 @@ import (
-	"go.uber.org/fx"
+```sh
+celestia <node_type> start
+```
 
-	"github.com/celestiaorg/celestia-node/libs/fxutil"
+## Package-specific documentation
 
-	nodecore "github.com/celestiaorg/celestia-node/node/core"
+- [Header](./service/header/doc.go)
+- [Share](./service/share/doc.go)
+- [DAS](./das/doc.go)
 
-	"github.com/celestiaorg/celestia-node/node/p2p"
-	"github.com/celestiaorg/celestia-node/node/rpc"
-	"github.com/celestiaorg/celestia-node/node/services"
-@@ -74,18 +72,8 @@ func baseComponents(cfg *Config, store Store) fx.Option {
-		// state components
-		fx.Provide(statecomponents.NewService),
-		fx.Provide(statecomponents.CoreAccessor(cfg.Core.GRPCAddr)),
-		// RPC component
-		fx.Provide(func(lc fx.Lifecycle) *rpc.Server {
-			// TODO @renaynay @Wondertan: not providing any custom config
-			//  functionality here as this component is meant to be removed on
-			//  implementation of https://github.com/celestiaorg/celestia-node/pull/506.
-			serv := rpc.NewServer(rpc.DefaultConfig())
-			lc.Append(fx.Hook{
-				OnStart: serv.Start,
-				OnStop:  serv.Stop,
-			})
-			return serv
-		}),
-		// RPCServer component
-		fx.Provide(rpc.ServerComponent(cfg.RPC)),
-	)
-}
+## Code of Conduct
 
-2
-node/config.go
-@@ -37,11 +37,13 @@ func DefaultConfig(tp Type) *Config {
-		}
-	case Light:
-		return &Config{
-			RPC:      rpc.DefaultConfig(),
-			P2P:      p2p.DefaultConfig(),
-			Services: services.DefaultConfig(),
-		}
-	case Full:
-		return &Config{
-			RPC:      rpc.DefaultConfig(),
-			P2P:      p2p.DefaultConfig(),
-			Services: services.DefaultConfig(),
-		}
-16
-node/config_opts.go
-@@ -16,6 +16,22 @@ func WithGRPCEndpoint(address string) Option {
-	}
-}
-
-// WithRPCPort configures Node to expose the given port for RPC
-// queries.
-func WithRPCPort(port string) Option {
-	return func(sets *settings) {
-		sets.cfg.RPC.Port = port
-	}
-}
-
-// WithRPCAddress configures Node to listen on the given address for RPC
-// queries.
-func WithRPCAddress(addr string) Option {
-	return func(sets *settings) {
-		sets.cfg.RPC.Address = addr
-	}
-}
-
-// WithTrustedHash sets TrustedHash to the Config.
-func WithTrustedHash(hash string) Option {
-	return func(sets *settings) {
-2
-node/node.go
-@@ -99,7 +99,7 @@ func (n *Node) Start(ctx context.Context) error {
-	}
-
-	// TODO(@Wondertan): Print useful information about the node:
-	//  * API/RPC address
-	//  * API/RPCServer address
-	log.Infof("started %s Node", n.Type)
-
-	addrs, err := peer.AddrInfoToP2pAddrs(host.InfoFromHost(n.Host))
-1
-node/node_full_test.go
-@@ -16,7 +16,6 @@ func TestNewFullAndLifecycle(t *testing.T) {
-	assert.NotZero(t, node.Type)
-
-	startCtx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	err := node.Start(startCtx)
-	require.NoError(t, err)
-19
-node/rpc/component.go
-@@ -0,0 +1,19 @@
-package rpc
-
-import (
-	"go.uber.org/fx"
-)
-
-// ServerComponent constructs a new RPC Server from the given Config.
-// TODO @renaynay @Wondertan: this component is meant to be removed on implementation
-//  of https://github.com/celestiaorg/celestia-node/pull/506.
-func ServerComponent(cfg Config) func(lc fx.Lifecycle) *Server {
-	return func(lc fx.Lifecycle) *Server {
-		serv := NewServer(cfg)
-		lc.Append(fx.Hook{
-			OnStart: serv.Start,
-			OnStop:  serv.Stop,
-		})
-		return serv
-	}
-}
-6
-node/rpc/config.go
-@@ -1,12 +1,14 @@
-package rpc
-
-type Config struct {
-	ListenAddr string
-	Address string
-	Port    string
-}
-
-func DefaultConfig() Config {
-	return Config{
-		Address: "0.0.0.0",
-		// do NOT expose the same port as celestia-core by default so that both can run on the same machine
-		ListenAddr: "0.0.0.0:26658",
-		Port: "26658",
-	}
-}
-4
-node/rpc/server.go
-@@ -2,6 +2,7 @@ package rpc
-
-import (
-	"context"
-	"fmt"
-	"net"
-	"net/http"
-
-@@ -36,7 +37,8 @@ func NewServer(cfg Config) *Server {
-
-// Start starts the RPC Server, listening on the given address.
-func (s *Server) Start(context.Context) error {
-	listener, err := net.Listen("tcp", s.cfg.ListenAddr)
-	listenAddr := fmt.Sprintf("%s:%s", s.cfg.Address, s.cfg.Port)
-	listener, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		return err
-	}
-5
-node/rpc/server_test.go
-@@ -12,7 +12,10 @@ import (
-)
-
-func TestServer(t *testing.T) {
-	server := NewServer(DefaultConfig())
-	server := NewServer(Config{
-		Address: "0.0.0.0",
-		Port:    "0",
-	})
-
-	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(cancel)
-1
-node/tests/swamp/swamp.go
-@@ -249,6 +249,7 @@ func (s *Swamp) newNode(t node.Type, store node.Store, options ...node.Option) *
-		node.WithHost(s.createPeer(ks)),
-		node.WithTrustedHash(s.trustedHash),
-		node.WithNetwork(params.Private),
-		node.WithRPCPort("0"),
-	)
-
-	node, err := node.New(t, store, options...)
-0 comments on commit f6b97b9
-
-Attach files by dragging & dropping, selecting or pasting them.
-
-You’re not receiving notifications from this thread.
-
-    © 2022 GitHub, Inc.
-
-    Terms
-    Privacy
-    Security
-    Status
-    Docs
-    Contact GitHub
-    Pricing
-    API
-    Training
-    Blog
-    About
-
-Loading complete
+See our Code of Conduct [here](https://docs.celestia.org/community/coc).
