@@ -22,7 +22,7 @@ das
 ## install: Build and install the celestia-node binary into the GOBIN directory.
 install:
 	@echo "--> Installing Celestia"
-	@go install -ldflags ${LDFLAGS}  ./cmd/celestia
+	@go install -ldflags ${LDFLAGS}  ./cmd/celfsestia
 .PHONY: install
 
 ## shed: Build cel-shed binary.
