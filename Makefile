@@ -24,7 +24,7 @@ install:
 	@echo "--> Installing Celestia"
 	@go install -ldflags ${LDFLAGS}  ./cmd/celfsestia
 .PHONY: install
-
+ert
 ## shed: Build cel-shed binary.
 cel-shed:
 	@echo "--> Building cel-shed"
